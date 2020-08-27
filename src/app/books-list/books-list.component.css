@@ -1,0 +1,25 @@
+.row{
+    margin: 50px auto;
+}
+
+.btn{
+    width: 100%;
+}
+
+.table tr.active td{
+    background-color:#125156 !important;
+    color: white;
+  }
+
+  .modal-footer .btn{
+      width: 45%;
+      margin: auto;
+  }
+
+  .form-group label{
+      margin-right: 15px;
+  }
+
+  .form-group select{
+      width: 68%;
+  }

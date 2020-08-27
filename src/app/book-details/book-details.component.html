@@ -1,0 +1,68 @@
+<div class="container">
+
+    <div class="row">
+        <div class="col-sm-12 text-center title">
+            <h1>Book details</h1>
+        </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <button [disabled]="selectedRow===0" type="button" class="btn btn-secondary"  (click)="goPrevious();">Previous book</button>
+      </div>
+      <div class="col-sm-6">
+          <button [disabled]="selectedRow===(numberOfBooks-1)" type="button" class="btn btn-primary"  (click)="goNext(); ">Next book</button>
+      </div>
+    </div>
+
+
+
+    <div class="row">
+        <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">ISBN</th>
+                <th scope="col">Title</th>
+                <th scope="col">Author</th>
+                <th scope="col">Type</th>
+                <th scope="col">Number of pages</th>
+                <th scope="col">Release date</th>
+                <th scope="col">Borrowed by</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{{bookToDisplayDetails.isbn}}</td>
+                <td>{{bookToDisplayDetails.title}}</td>
+                <td>{{bookToDisplayDetails.author}}</td>
+                <td>{{types[bookToDisplayDetails.type]}}</td>
+                <td>{{bookToDisplayDetails.pagesNumber}}</td>
+                <td>{{bookToDisplayDetails.releaseDate | date}}</td>
+
+                <ng-container *ngIf="bookToDisplayDetails.borrower!=''; then thenBlock; else elseBlock"></ng-container>
+
+                <ng-template #thenBlock>
+                    <td >{{bookToDisplayDetails.borrower}}</td>
+                    <td><button disabled="true" type="button" class="btn btn-success">Borrow book</button></td>
+                </ng-template>
+
+                <ng-template #elseBlock>
+                    <td><select [(ngModel)]="selectedUser">
+                        <option value="" disabled selected hidden>Select user</option>
+                        <option  *ngFor="let user of users">{{user.name}}</option>
+                      </select></td>
+                      <td><button type="button" class="btn btn-success" (click)="borrowBook()">Borrow book</button></td>
+                </ng-template>
+              </tr>
+            </tbody>
+          </table>
+    </div>
+
+    <div class="row ">
+        <div class="col-sm-12 backButton">
+            <button type="button" class="btn btn-info" (click)="goToLibrary(); ">Back to Library</button>
+        </div>
+    </div>
+
+
+</div>

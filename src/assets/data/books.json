@@ -1,0 +1,11 @@
+[  
+    {
+        "isbn": 1234567890123,
+        "title": "Robinson Crusoe",
+        "author": "Daniel Defoe",
+        "type": "BookType.Adventure",
+        "pagesNumber": 342,
+        "releaseDate": "new Date(2005, 11, 27)",
+        "borrower": "USERS[1].name"
+    }
+] 

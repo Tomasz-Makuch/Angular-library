@@ -1,0 +1,189 @@
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-sm-12 text-center title">
+            <h1>School library</h1>
+        </div>
+
+    </div>
+
+    <div class="row filter align-items-center">
+        <div class="col-2 text-right">
+            <label for="exampleFormControlSelect1">Select filter</label>
+        </div>
+        <div class="col-3">
+            <select class="form-control" id="exampleFormControlSelect1">    
+                <ng-container *ngFor="let filter of filterType;">
+                    <option>{{filter}}</option>
+                 </ng-container>
+            </select>
+        </div>
+        <div class="col-sm-7">
+            <input type="text" class="form-control" placeholder="search">
+        </div>
+    </div>
+
+    <div class="row">
+        <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">ISBN</th>
+                <th scope="col">Title</th>
+                <th scope="col">Author</th>
+                <th scope="col">Type</th>
+                <th scope="col">Number of pages</th>
+                <th scope="col">Release date</th>
+                <th scope="col">Borrowed by</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let book of books; let i = index" (click)="setClickedRow(i, book)" [class.active]="i == selectedRow">
+                <td>{{book.isbn}}</td>
+                <td>{{book.title}}</td>
+                <td>{{book.author}}</td>
+                <td>{{types[book.type]}}</td>
+                <td>{{book.pagesNumber}}</td>
+                <td>{{book.releaseDate | date}}</td>
+                <td>{{book.borrower}}</td>
+              </tr>
+            </tbody>
+          </table>
+    </div>
+
+    
+
+
+    <div class="row">
+        <div class="col-sm-3">
+            <button type="button" class="btn btn-success" (click)="setBookToAddEmpty(); open(addModal)">Add new book</button>
+        </div>
+        <div class="col-sm-3">
+           <button type="button" class="btn btn-primary" (click)="open(editModal)" [disabled]="selectedRow==-1">Edit</button>
+        </div>
+        <div class="col-sm-3">
+            <button type="button" class="btn btn-danger" (click)="deleteBook()" [disabled]="selectedRow==-1">Delete</button>
+        </div>
+        <div class="col-sm-3">
+            <button type="button" class="btn btn-dark" (click)="goToDetails()"[disabled]="selectedRow==-1">Details</button>
+        </div>
+    </div>
+</div>
+   
+<ng-template #addModal let-modal let-c="close">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Add new book</h4>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="addEditBookForm" novalidate (ngSubmit)="onSubmit()">
+        {{addEditBookForm}}
+      <div class="form-group">
+        <input formControlName="isbn" type="number" class="form-control" placeholder="ISBN" [class.is-invalid]="addEditBookForm.get('isbn').invalid && addEditBookForm.get('isbn').touched" [(ngModel)]="this.bookToAdd.isbn">
+        <div *ngIf="addEditBookForm.get('isbn').invalid && addEditBookForm.get('isbn').touched">
+          <small class="text-danger" *ngIf="addEditBookForm.get('isbn').errors?.required">ISBN number is required</small>
+          <small class="text-danger" *ngIf="addEditBookForm.get('isbn').errors?.pattern">ISBN number must be 13 digits</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input formControlName="title" type="text" class="form-control" placeholder="title" [class.is-invalid]="addEditBookForm.get('title').invalid && addEditBookForm.get('title').touched" [(ngModel)]="this.bookToAdd.title" >
+        <small class="text-danger" [class.d-none]="addEditBookForm.get('title').valid || addEditBookForm.get('title').untouched" >Title is required</small>
+      </div>
+
+      <div class="form-group">
+        <input formControlName="author" type="text" class="form-control" placeholder="author" [class.is-invalid]="addEditBookForm.get('author').invalid && addEditBookForm.get('author').touched" [(ngModel)]="this.bookToAdd.author">
+        <small class="text-danger" [class.d-none]="addEditBookForm.get('author').valid || addEditBookForm.get('author').untouched" >Author is required</small>
+      </div>
+
+      <div class="form-group">
+        <label for="type">Choose book type:</label>
+        <select formControlName="type" [(ngModel)]="this.bookToAdd.type">
+          <option  *ngFor="let key of keysBookTypes" [value]="key" [label]="bookTypes[key]" ></option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <input formControlName="pagesNumber" type="number" class="form-control" placeholder="number of pages" [class.is-invalid]="addEditBookForm.get('pagesNumber').invalid && addEditBookForm.get('pagesNumber').touched" [(ngModel)]="this.bookToAdd.pagesNumber">
+        
+        <div *ngIf="addEditBookForm.get('pagesNumber').invalid && addEditBookForm.get('pagesNumber').touched">
+          <small class="text-danger" *ngIf="addEditBookForm.get('pagesNumber').errors?.required">Page numbers is required</small>
+          <small class="text-danger" *ngIf="addEditBookForm.get('pagesNumber').errors?.min">Page numbers must be greater than 0</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input formControlName="releaseDate" type="date" class="form-control" placeholder="release date" [class.is-invalid]="addEditBookForm.get('releaseDate').invalid && addEditBookForm.get('releaseDate').touched" [(ngModel)]="this.bookToAdd.releaseDate">
+        <small class="text-danger" [class.d-none]="addEditBookForm.get('releaseDate').valid || addEditBookForm.get('releaseDate').untouched" >Release date is required</small>
+      </div>
+
+    </form>
+    
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Close click'); addEditBookForm.reset()" >Close</button>
+    <button [disabled]="addEditBookForm.invalid" type="button" class="btn btn-success" (click)="addNewBook(); modal.close('Close click');">Add book</button>
+  </div>
+</ng-template>
+
+<!------------------------------- EDIT MODAL------------------------------->
+
+<ng-template #editModal let-modal let-c="close" class="modal">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Edit book</h4>
+  </div>
+  <div class="modal-body">
+
+    <form [formGroup]="addEditBookForm" novalidate (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <input formControlName="isbn" type="number" class="form-control" placeholder="ISBN" [class.is-invalid]="addEditBookForm.get('isbn').invalid && addEditBookForm.get('isbn').touched" [(ngModel)]="this.bookToEdit.isbn">
+      <div *ngIf="addEditBookForm.get('isbn').invalid && addEditBookForm.get('isbn').touched">
+        <small class="text-danger" *ngIf="addEditBookForm.get('isbn').errors?.required">ISBN number is required</small>
+        <small class="text-danger" *ngIf="addEditBookForm.get('isbn').errors?.pattern">ISBN number must be 13 digits</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <input formControlName="title" type="text" class="form-control" placeholder="title" [class.is-invalid]="addEditBookForm.get('title').invalid && addEditBookForm.get('title').touched" [(ngModel)]="this.bookToEdit.title" >
+      <small class="text-danger" [class.d-none]="addEditBookForm.get('title').valid || addEditBookForm.get('title').untouched" >Title is required</small>
+    </div>
+
+    <div class="form-group">
+      <input formControlName="author" type="text" class="form-control" placeholder="author" [class.is-invalid]="addEditBookForm.get('author').invalid && addEditBookForm.get('author').touched" [(ngModel)]="this.bookToEdit.author">
+      <small class="text-danger" [class.d-none]="addEditBookForm.get('author').valid || addEditBookForm.get('author').untouched" >Author is required</small>
+    </div>
+
+    <div class="form-group">
+      <label for="type">Choose book type:</label>
+      <select formControlName="type" [(ngModel)]="this.bookToEdit.type">
+        <option  *ngFor="let key of keysBookTypes" [value]="key" [label]="bookTypes[key]" ></option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <input formControlName="pagesNumber" type="number" class="form-control" placeholder="number of pages" [class.is-invalid]="addEditBookForm.get('pagesNumber').invalid && addEditBookForm.get('pagesNumber').touched" [(ngModel)]="this.bookToEdit.pagesNumber">
+      
+      <div *ngIf="addEditBookForm.get('pagesNumber').invalid && addEditBookForm.get('pagesNumber').touched">
+        <small class="text-danger" *ngIf="addEditBookForm.get('pagesNumber').errors?.required">Page numbers is required</small>
+        <small class="text-danger" *ngIf="addEditBookForm.get('pagesNumber').errors?.min">Page numbers must be greater than 0</small>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <input formControlName="releaseDate" type="date" class="form-control" placeholder="release date" [class.is-invalid]="addEditBookForm.get('releaseDate').invalid && addEditBookForm.get('releaseDate').touched" [ngModel] ="this.bookToEdit.releaseDate | date:'yyyy-MM-dd'" (ngModelChange)="dt = $event">
+      <small class="text-danger" [class.d-none]="addEditBookForm.get('releaseDate').valid || addEditBookForm.get('releaseDate').untouched" >Release date is required</small>
+    </div>
+
+  </form>  
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.close('Close click'); addEditBookForm.reset();">Close</button>
+    <button type="button" [disabled]="addEditBookForm.invalid" class="btn btn-success" (click)="saveEditedBook(); modal.close('Close click')">Save</button>
+  </div>
+</ng-template>
+
+<hr>
+<pre>{{closeResult}}</pre>
+
+
+
+

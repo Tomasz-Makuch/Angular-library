@@ -1,0 +1,14 @@
+.borrowDiv{
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn{
+    width: 100%;
+}
+
+.row{
+    margin: 50px auto;
+}
