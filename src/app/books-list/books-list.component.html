@@ -12,13 +12,14 @@
         <div class="col-2 text-right">
             <label for="exampleFormControlSelect1">Select filter</label>
         </div>
-        <div class="col-3">
+        <!--<div class="col-3">
             <select class="form-control" id="exampleFormControlSelect1">    
                     <option *ngFor="let filter of filterType">{{filter}}</option>
             </select>
-        </div>
+        </div>-->
         <div class="col-sm-7">
-            <input type="text" class="form-control" placeholder="search">
+            <input type="text" class="form-control" placeholder="search" [(ngModel)]= "searchTerm">
+            {{searchTerm}}
         </div>
     </div>
 
@@ -36,7 +37,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let book of books; let i = index" (click)="setClickedRow(i, book)" [class.active]="i == selectedRow">
+              <tr *ngFor="let book of filteredBooks; let i = index" (click)="setClickedRow(i, book)" [class.active]="i == selectedRow">
                 <td>{{book.isbn}}</td>
                 <td>{{book.title}}</td>
                 <td>{{book.author}}</td>
@@ -73,7 +74,6 @@
   </div>
   <div class="modal-body">
     <form [formGroup]="addEditBookForm" novalidate (ngSubmit)="onSubmit()">
-        {{addEditBookForm}}
       <div class="form-group">
         <input formControlName="isbn" type="number" class="form-control" placeholder="ISBN" [class.is-invalid]="addEditBookForm.get('isbn').invalid && addEditBookForm.get('isbn').touched" [(ngModel)]="this.bookToAdd.isbn">
         <div *ngIf="addEditBookForm.get('isbn').invalid && addEditBookForm.get('isbn').touched">

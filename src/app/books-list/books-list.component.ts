@@ -9,6 +9,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router'
 import { LibraryService } from '../services/library.service';
 import { UserService } from '../services/user.service';
+import { BOOKS } from '../fake-database/book-list';
 
 
 @Component({
@@ -17,8 +18,9 @@ import { UserService } from '../services/user.service';
   styleUrls: ['./books-list.component.css']
 })
 export class BooksListComponent implements OnInit {
-
   books: Book[];
+  filteredBooks: Book[];
+  private _searchTerm: string;
   users: User[];
   types = BookType;
   selectedRow: number;
@@ -43,12 +45,14 @@ export class BooksListComponent implements OnInit {
       private _libraryService: LibraryService,
       private modalService: NgbModal,
       private fb: FormBuilder,
-      private router: Router) { }
+      private router: Router) { 
+      }
 
   ngOnInit(): void {
     this.selectedRow = -1;
     this.filterType = ['isbn', 'title', 'author', 'type', 'number of pages', 'release date', 'borrowed by' ];
     this.keysBookTypes = Object.keys(this.bookTypes).filter(k => !isNaN(Number(k)));
+    this.filteredBooks = this.books;
 
     this.bookToAdd = {
       isbn: null,
@@ -58,7 +62,7 @@ export class BooksListComponent implements OnInit {
       pagesNumber: null,
       releaseDate: null,
       borrower: '',
-    }
+    };
 
     this._libraryService.getBooks().subscribe(booksSend => this.books = booksSend);
     this._userService.getUsers().subscribe(usersSend => this.users = usersSend);
@@ -80,6 +84,19 @@ export class BooksListComponent implements OnInit {
     } else {
       return  `with: ${reason}`;
     }
+  }
+
+  get searchTerm(): string{
+    return this._searchTerm;
+  }
+
+  set searchTerm(value: string){
+    this._searchTerm = value;
+    this.filteredBooks = this.filter(value);
+  }
+
+  filter(searchString: string): Book[]{
+    return this.books.filter(book => book.title.toLowerCase().indexOf(searchString.toLowerCase()) !== -1);
   }
 
   setClickedRow(index: number, book: Book): void {
