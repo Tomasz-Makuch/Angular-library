@@ -9,9 +9,11 @@ import {delay} from 'rxjs/operators';
 })
 export class UserService {
 
-  users: User[] = USERS;
+  private users: User[];
 
-  constructor() { }
+  constructor() {
+    this.users = USERS;
+  }
 
   getUsers(): Observable<User[]> {
     return of(this.users).pipe(delay(1000));

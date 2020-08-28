@@ -14,9 +14,7 @@
         </div>
         <div class="col-3">
             <select class="form-control" id="exampleFormControlSelect1">    
-                <ng-container *ngFor="let filter of filterType;">
-                    <option>{{filter}}</option>
-                 </ng-container>
+                    <option *ngFor="let filter of filterType">{{filter}}</option>
             </select>
         </div>
         <div class="col-sm-7">
@@ -51,9 +49,6 @@
           </table>
     </div>
 
-    
-
-
     <div class="row">
         <div class="col-sm-3">
             <button type="button" class="btn btn-success" (click)="setBookToAddEmpty(); open(addModal)">Add new book</button>
@@ -70,6 +65,8 @@
     </div>
 </div>
    
+<!------------------------------- ADD MODAL------------------------------->
+
 <ng-template #addModal let-modal let-c="close">
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Add new book</h4>
@@ -97,9 +94,11 @@
 
       <div class="form-group">
         <label for="type">Choose book type:</label>
-        <select formControlName="type" [(ngModel)]="this.bookToAdd.type">
-          <option  *ngFor="let key of keysBookTypes" [value]="key" [label]="bookTypes[key]" ></option>
+        <select formControlName="type" [class.is-invalid]="addEditBookForm.get('type').invalid && addEditBookForm.get('type').touched" [(ngModel)]="this.bookToAdd.type"> 
+          <option value="" disabled selected hidden>Select book type</option>
+          <option  *ngFor="let key of keysBookTypes" [value]="key" [label]="bookTypes[key]"></option>
         </select>
+        <small class="text-danger" [class.d-none]="addEditBookForm.get('type').valid || addEditBookForm.get('type').untouched" >Book type is required</small>
       </div>
 
       <div class="form-group">

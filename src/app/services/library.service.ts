@@ -1,13 +1,8 @@
 import { Injectable } from '@angular/core';
-
 import { Book } from "../model/book";
-import { BookType } from "../model/book-types";
-import { USERS } from '../fake-database/user-list';
 import { BOOKS } from '../fake-database/book-list';
-import { User } from "../model/user";
 import {Observable, of} from 'rxjs';
 import {delay} from 'rxjs/operators';
-//import { HttpClient } from '@angular/common/http';
 
 
 @Injectable({
@@ -15,13 +10,11 @@ import {delay} from 'rxjs/operators';
 })
 export class LibraryService {
 
-  books: Book[] = BOOKS;
-  /*private _urlBooks: string = '/assets/data/books.json';
-  constructor(private http: HttpClient) {}
+  private books: Book[];
 
-  getBooks(): Observable<Book[]> {
-    return this.http.get<Book[]>(this._urlBooks);
-  }*/
+  constructor() {
+    this.books = BOOKS;
+  }
 
   getBooks(): Observable<Book[]> {
     return of(this.books).pipe(delay(1000));
@@ -39,7 +32,7 @@ export class LibraryService {
     this.books.push(JSON.parse(JSON.stringify(book)));
   }
 
-  saveBook(selectedRow: number, book: Book): void{
+  saveEditedBook(selectedRow: number, book: Book): void{
     this.books[selectedRow] = JSON.parse(JSON.stringify(book));
   }
 
@@ -48,10 +41,6 @@ export class LibraryService {
   }
 
   borrowBook(selectedRow: number, user: string): void {
-    console.log('wypo w serwisie' + selectedRow + '   ' + user);
     this.books[selectedRow].borrower = user;
   }
-
-
-
 }

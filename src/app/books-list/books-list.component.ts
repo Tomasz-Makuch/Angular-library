@@ -21,17 +21,13 @@ export class BooksListComponent implements OnInit {
   books: Book[];
   users: User[];
   types = BookType;
-  filterType = ['isbn', 'title', 'author', 'type', 'number of pages', 'release date', 'borrowed by' ];
-
   selectedRow: number;
-
   bookTypes = BookType;
   keysBookTypes: string[];
   closeResult: string;
-
-  constructor(private _userService: UserService, private _libraryService: LibraryService, private modalService: NgbModal, private fb: FormBuilder, private router: Router) {
-    this.keysBookTypes = Object.keys(this.bookTypes).filter(k => !isNaN(Number(k)));
-  }
+  bookToAdd: Book;
+  bookToEdit: Book;
+  filterType: string[];
 
   addEditBookForm = this.fb.group({
     isbn:  ['', [Validators.required, Validators.pattern('^\\d{13}$')]],
@@ -42,28 +38,30 @@ export class BooksListComponent implements OnInit {
     releaseDate: ['', Validators.required],
   });
 
-  bookToAdd: Book;
-  bookToEdit: Book;
+  constructor(
+      private _userService: UserService,
+      private _libraryService: LibraryService,
+      private modalService: NgbModal,
+      private fb: FormBuilder,
+      private router: Router) { }
 
   ngOnInit(): void {
     this.selectedRow = -1;
-    this._libraryService.getBooks()
-      .subscribe(booksSend => this.books = booksSend);
-    this._userService.getUsers()
-      .subscribe(usersSend => this.users = usersSend);
+    this.filterType = ['isbn', 'title', 'author', 'type', 'number of pages', 'release date', 'borrowed by' ];
+    this.keysBookTypes = Object.keys(this.bookTypes).filter(k => !isNaN(Number(k)));
+
     this.bookToAdd = {
       isbn: null,
       title: '',
       author: '',
-      type: BookType.Adventure,
+      type: null,
       pagesNumber: null,
       releaseDate: null,
       borrower: '',
     }
-  }
 
-  onSubmit(){
-    
+    this._libraryService.getBooks().subscribe(booksSend => this.books = booksSend);
+    this._userService.getUsers().subscribe(usersSend => this.users = usersSend);
   }
 
   open(content) {
@@ -84,17 +82,16 @@ export class BooksListComponent implements OnInit {
     }
   }
 
-  setClickedRow(index: number, book: Book){
+  setClickedRow(index: number, book: Book): void {
     this.selectedRow = index;
     this.bookToEdit = book;
-
   }
 
   setBookToAddEmpty(): void {
     this.bookToAdd.isbn = null;
     this.bookToAdd.title = '';
     this.bookToAdd.author = '';
-    this.bookToAdd.type = BookType.Adventure;
+    this.bookToAdd.type = null;
     this.bookToAdd.pagesNumber = null;
     this.bookToAdd.releaseDate = null;
     this.bookToAdd.borrower = '';
@@ -107,9 +104,8 @@ export class BooksListComponent implements OnInit {
   }
 
   saveEditedBook(): void{
-    this._libraryService.saveBook(this.selectedRow, this.bookToEdit);
+    this._libraryService.saveEditedBook(this.selectedRow, this.bookToEdit);
     alert('the book has been saved correctly');
-    this.addEditBookForm.reset();
   }
 
   deleteBook(): void{
