@@ -18,6 +18,7 @@ export class LibraryService {
 
   getBooks(): Observable<Book[]> {
     return of(this.books).pipe(delay(1000));
+    //return this.booksObs.asObservable();
   }
 
   getBook(selectedRow: number): Observable<Book> {
@@ -43,4 +44,9 @@ export class LibraryService {
   borrowBook(selectedRow: number, user: string): void {
     this.books[selectedRow].borrower = user;
   }
+
+//   setBooks(books: Book[]): void {
+//     this.books = books;
+// }
+
 }

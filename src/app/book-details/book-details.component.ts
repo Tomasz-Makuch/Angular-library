@@ -28,7 +28,7 @@ export class BookDetailsComponent implements OnInit {
       isbn: null,
       title: '',
       author: '',
-      type: BookType.Adventure,
+      type: null,
       pagesNumber: null,
       releaseDate: null,
       borrower: '',

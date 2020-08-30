@@ -21,15 +21,20 @@ export class BooksListComponent implements OnInit {
   books: Book[];
   filteredBooks: Book[];
   private _searchTerm: string;
+  selectedSearchFilter: string;
   users: User[];
   types = BookType;
   selectedRow: number;
   bookTypes = BookType;
   keysBookTypes: string[];
-  closeResult: string;
   bookToAdd: Book;
   bookToEdit: Book;
   filterType: string[];
+  searchTextBoxActive: boolean;
+
+  searchTextIsActive: boolean;
+  addAlertSuccess: boolean;
+  editAlertSuccess: boolean;
 
   addEditBookForm = this.fb.group({
     isbn:  ['', [Validators.required, Validators.pattern('^\\d{13}$')]],
@@ -45,14 +50,19 @@ export class BooksListComponent implements OnInit {
       private _libraryService: LibraryService,
       private modalService: NgbModal,
       private fb: FormBuilder,
-      private router: Router) { 
+      private router: Router) {
       }
 
   ngOnInit(): void {
+    this.searchTextBoxActive = false;
+    this.addAlertSuccess = false;
+    this.editAlertSuccess = false;
     this.selectedRow = -1;
+    this.selectedSearchFilter = '';
+    this.searchTextIsActive = false;
     this.filterType = ['isbn', 'title', 'author', 'type', 'number of pages', 'release date', 'borrowed by' ];
     this.keysBookTypes = Object.keys(this.bookTypes).filter(k => !isNaN(Number(k)));
-    this.filteredBooks = this.books;
+    //this.filteredBooks = this.books;
 
     this.bookToAdd = {
       isbn: null,
@@ -65,38 +75,33 @@ export class BooksListComponent implements OnInit {
     };
 
     this._libraryService.getBooks().subscribe(booksSend => this.books = booksSend);
+    this._libraryService.getBooks().subscribe(booksSend => this.filteredBooks = booksSend);
     this._userService.getUsers().subscribe(usersSend => this.users = usersSend);
   }
 
   open(content) {
-    this.modalService.open(content).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
-  }
-
-  private getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-      return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-      return 'by clicking on a backdrop';
-    } else {
-      return  `with: ${reason}`;
-    }
+    this.modalService.open(content);
   }
 
   get searchTerm(): string{
     return this._searchTerm;
   }
 
-  set searchTerm(value: string){
-    this._searchTerm = value;
-    this.filteredBooks = this.filter(value);
+  set searchTerm(searchValue: string){
+    this._searchTerm = searchValue;
+    this.filteredBooks = this.filter(searchValue);
   }
 
   filter(searchString: string): Book[]{
-    return this.books.filter(book => book.title.toLowerCase().indexOf(searchString.toLowerCase()) !== -1);
+    switch (this.selectedSearchFilter) {
+      case 'isbn': return this.books.filter(book =>  book.isbn.toString().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'title': return this.books.filter(book => book.title.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'author': return this.books.filter(book => book.author.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'type': return this.books.filter(book => this.bookTypes[book.type].toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'number of pages': return this.books.filter(book =>  book.pagesNumber.toString().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'release date': return this.books.filter(book => book.releaseDate.toString().toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'borrowed by': return this.books.filter(book => book.borrower.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+    }
   }
 
   setClickedRow(index: number, book: Book): void {
@@ -115,14 +120,22 @@ export class BooksListComponent implements OnInit {
   }
 
   addNewBook(): void{
-    this._libraryService.addBook(this.bookToAdd);
-    this.setBookToAddEmpty();
-    this.addEditBookForm.reset();
+    if (!this.checkIfBookWithIsbnExist()){
+      this.addAlertSuccess = true;
+      this._libraryService.addBook(this.bookToAdd);
+      this.setBookToAddEmpty();
+      this.addEditBookForm.reset();
+    }
   }
 
-  saveEditedBook(): void{
-    this._libraryService.saveEditedBook(this.selectedRow, this.bookToEdit);
-    alert('the book has been saved correctly');
+  checkIfBookWithIsbnExist(): boolean{
+    if(this.books.filter(book =>  book.isbn === this.bookToAdd.isbn).length > 0){
+      alert('the book with this ISBN: ' + this.bookToAdd.isbn + ' already exist !!!');
+      return true;
+    }
+    else{
+      return false;
+    }
   }
 
   deleteBook(): void{
@@ -131,5 +144,20 @@ export class BooksListComponent implements OnInit {
 
   goToDetails(): void{
     this.router.navigate(['/library', this.selectedRow]);
+  }
+
+  onChangeFilterOption(value: string): void{
+    this.searchTextIsActive = true;
+    this._searchTerm = '';
+    this.filteredBooks = this.books;
+    this.searchTextBoxActive = true;
+  }
+
+  onSubmit(): void{
+    this._libraryService.saveEditedBook(this.selectedRow, this.addEditBookForm.value);
+  }
+
+  closeAlert(): void {
+    this.addAlertSuccess = false;
   }
 }

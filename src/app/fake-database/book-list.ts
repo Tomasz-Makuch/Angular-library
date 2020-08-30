@@ -1,5 +1,5 @@
-import { Book } from "../model/book";
-import { BookType } from "../model/book-types";
+import { Book } from '../model/book';
+import { BookType } from '../model/book-types';
 import { USERS } from '../fake-database/user-list';
 
 export const BOOKS: Book[] = [
@@ -13,7 +13,6 @@ export const BOOKS: Book[] = [
         releaseDate: new Date(2005, 11, 27),
         borrower: USERS[1].name,
     },
-
     {
         isbn: 3456789012312,
         title: 'Frankenstein',
@@ -23,7 +22,6 @@ export const BOOKS: Book[] = [
         releaseDate: new Date(1995, 11, 17),
         borrower: '',
     },
-
     {
         isbn: 5477887586745,
         title: 'Hamlet',
@@ -33,7 +31,6 @@ export const BOOKS: Book[] = [
         releaseDate: new Date(1999, 7, 24),
         borrower: USERS[3].name,
     },
-
     {
         isbn: 2334887342431,
         title: 'The Lord of the Rings',
@@ -43,7 +40,6 @@ export const BOOKS: Book[] = [
         releaseDate: new Date(2001, 1, 30),
         borrower: '',
     },
-
     {
         isbn: 3245326542341,
         title: 'Gulliver’s Travels',
