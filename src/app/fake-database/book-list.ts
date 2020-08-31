@@ -3,7 +3,6 @@ import { BookType } from '../model/book-types';
 import { USERS } from '../fake-database/user-list';
 
 export const BOOKS: Book[] = [
-
     {
         isbn: 1234567890123,
         title: 'Robinson Crusoe',

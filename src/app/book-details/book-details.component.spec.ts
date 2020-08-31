@@ -1,13 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { BookDetailsComponent } from './book-details.component';
-
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { LibraryService } from '../services/library.service';
-import { UserService } from '../services/user.service';
-import {Observable, of} from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { of} from 'rxjs';
 
 describe('BookDetailsComponent', () => {
   let component: BookDetailsComponent;

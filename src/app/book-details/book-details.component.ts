@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 import { LibraryService } from '../services/library.service';
-import { Book } from "../model/book";
+import { Book } from '../model/book';
 import { User } from '../model/user';
 import { BookType } from '../model/book-types';
 import { UserService } from '../services/user.service';
@@ -20,19 +20,13 @@ export class BookDetailsComponent implements OnInit {
   public users: User[];
   types = BookType;
 
-  constructor(private route: ActivatedRoute, private router: Router, private _libraryService: LibraryService, private _userService: UserService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private _libraryService: LibraryService,
+    private _userService: UserService) { }
 
   ngOnInit(): void {
-
-    this.bookToDisplayDetails = {
-      isbn: null,
-      title: '',
-      author: '',
-      type: null,
-      pagesNumber: null,
-      releaseDate: null,
-      borrower: '',
-    };
 
     this.route.paramMap.subscribe((params: ParamMap) => {
       let id = parseInt(params.get('id'));
@@ -42,10 +36,9 @@ export class BookDetailsComponent implements OnInit {
     this._libraryService.getBook(this.selectedRow).subscribe(book => this.bookToDisplayDetails = book);
     this._libraryService.getNumberOfBooks().subscribe(bookNum => this.numberOfBooks = bookNum);
     this._userService.getUsers().subscribe(usersSend => this.users = usersSend);
-
   }
 
-  goPrevious(){
+  goPrevious(): void {
     let prevId: number;
     if(this.selectedRow === 0){
       prevId = 0;
@@ -58,21 +51,18 @@ export class BookDetailsComponent implements OnInit {
     });;
   }
 
-  goNext(){
+  goNext(): void{
     let nextId = this.selectedRow + 1;
     this.router.navigate(['/library', nextId]).then(() => {
       window.location.reload();
     });;
   }
 
-  goToLibrary(){
-    //let selectedId = this.selectedRow ? this.selectedRow : null;
+  goToLibrary(): void{
     this.router.navigate(['/library']);
-
   }
 
-  borrowBook(){
-    console.log('ojoj: ' + this.selectedUser);
+  borrowBook(): void{
     this._libraryService.borrowBook(this.selectedRow, this.selectedUser);
   }
 

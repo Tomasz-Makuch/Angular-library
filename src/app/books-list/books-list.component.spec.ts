@@ -3,11 +3,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BooksListComponent } from './books-list.component';
 import { LibraryService } from '../services/library.service';
-import { UserService } from '../services/user.service';
 import { Component } from '@angular/core';
-import {Observable, of} from 'rxjs';
 import { Book } from '../model/book';
 import { By } from '@angular/platform-browser';
+import { of} from 'rxjs';
 
 describe('BooksListComponent', () => {
   let component: BooksListComponent;
@@ -35,7 +34,7 @@ describe('BooksListComponent', () => {
           pagesNumber: 232,
           releaseDate: new Date(1995, 11, 17),
           borrower: '',
-      },
+      }
     ])
     );
     TestBed.configureTestingModule({
@@ -77,7 +76,7 @@ describe('BooksListComponent', () => {
   });
 
   it('Should be four buttons', () => {
-    let buttonList = fixture.debugElement.queryAll(By.css('button'));
+    const buttonList = fixture.debugElement.queryAll(By.css('button'));
     expect(buttonList.length).toEqual(4);
   });
 
@@ -113,13 +112,6 @@ describe('BooksListComponent', () => {
     const tableItems = fixture.debugElement.queryAll(By.css('tr'));
     expect(tableItems.length).toBe(101);
   });
-
-
-
-
-
-
-
 });
 
 @Component({template: ''})

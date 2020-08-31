@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-
 import { LibraryService } from './library.service';
 import { Book } from '../model/book';
 
@@ -34,9 +33,4 @@ describe('LibraryService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
-
-  // it('list of books sholud be empty', () => {
-  //   service.setBooks(books);
-  //   expect(service.getNumberOfBooks.call().toEqual(2);
-  // });
 });

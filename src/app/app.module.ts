@@ -10,13 +10,15 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { LibraryService } from './services/library.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BookDetailsComponent } from './book-details/book-details.component';
-//import { HttpClientModule } from '@angular/common/http';
+import { UserService } from './services/user.service';
+
+
 
 @NgModule({
   declarations: [
     AppComponent,
     BooksListComponent,
-    BookDetailsComponent
+    BookDetailsComponent,
   ],
   imports: [
     BrowserModule,
@@ -24,9 +26,8 @@ import { BookDetailsComponent } from './book-details/book-details.component';
     NgbModule,
     FormsModule,
     ReactiveFormsModule,
-   // HttpClientModule
   ],
-  providers: [LibraryService],
+  providers: [LibraryService, UserService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

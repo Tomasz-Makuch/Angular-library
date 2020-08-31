@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { User } from "../model/user";
+import { User } from '../model/user';
 import { USERS } from '../fake-database/user-list';
 import {Observable, of} from 'rxjs';
 import {delay} from 'rxjs/operators';

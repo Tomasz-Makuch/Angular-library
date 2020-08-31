@@ -1,15 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-
 import { Book } from '../model/book';
 import { BookType } from '../model/book-types';
 import { User } from '../model/user';
-
-import {NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router'
+import { Router } from '@angular/router';
 import { LibraryService } from '../services/library.service';
 import { UserService } from '../services/user.service';
-import { BOOKS } from '../fake-database/book-list';
 
 
 @Component({
@@ -18,6 +15,7 @@ import { BOOKS } from '../fake-database/book-list';
   styleUrls: ['./books-list.component.css']
 })
 export class BooksListComponent implements OnInit {
+
   books: Book[];
   filteredBooks: Book[];
   private _searchTerm: string;
@@ -31,10 +29,12 @@ export class BooksListComponent implements OnInit {
   bookToEdit: Book;
   filterType: string[];
   searchTextBoxActive: boolean;
+  searchTextBoxIsActive: boolean;
 
-  searchTextIsActive: boolean;
-  addAlertSuccess: boolean;
-  editAlertSuccess: boolean;
+  alertSuccess: boolean;
+  alertFailure: boolean;
+
+  private modalRef: NgbModalRef;
 
   addEditBookForm = this.fb.group({
     isbn:  ['', [Validators.required, Validators.pattern('^\\d{13}$')]],
@@ -43,6 +43,7 @@ export class BooksListComponent implements OnInit {
     type:  ['', Validators.required],
     pagesNumber: ['', [Validators.required, Validators.min(0)]],
     releaseDate: ['', Validators.required],
+    borrower: [''],
   });
 
   constructor(
@@ -55,14 +56,12 @@ export class BooksListComponent implements OnInit {
 
   ngOnInit(): void {
     this.searchTextBoxActive = false;
-    this.addAlertSuccess = false;
-    this.editAlertSuccess = false;
+    this.alertSuccess = false;
+    this.alertFailure = false;
     this.selectedRow = -1;
     this.selectedSearchFilter = '';
-    this.searchTextIsActive = false;
-    this.filterType = ['isbn', 'title', 'author', 'type', 'number of pages', 'release date', 'borrowed by' ];
+    this.searchTextBoxIsActive = false;
     this.keysBookTypes = Object.keys(this.bookTypes).filter(k => !isNaN(Number(k)));
-    //this.filteredBooks = this.books;
 
     this.bookToAdd = {
       isbn: null,
@@ -73,14 +72,15 @@ export class BooksListComponent implements OnInit {
       releaseDate: null,
       borrower: '',
     };
+    this.filterType = Object.keys(this.bookToAdd);
 
     this._libraryService.getBooks().subscribe(booksSend => this.books = booksSend);
     this._libraryService.getBooks().subscribe(booksSend => this.filteredBooks = booksSend);
     this._userService.getUsers().subscribe(usersSend => this.users = usersSend);
   }
 
-  open(content) {
-    this.modalService.open(content);
+  open(content): void {
+    this.modalRef = this.modalService.open(content);
   }
 
   get searchTerm(): string{
@@ -89,18 +89,25 @@ export class BooksListComponent implements OnInit {
 
   set searchTerm(searchValue: string){
     this._searchTerm = searchValue;
-    this.filteredBooks = this.filter(searchValue);
+    this.filteredBooks = this.filterBooks(searchValue);
   }
 
-  filter(searchString: string): Book[]{
+  filterBooks(searchString: string): Book[]{
     switch (this.selectedSearchFilter) {
-      case 'isbn': return this.books.filter(book =>  book.isbn.toString().indexOf(searchString.toLowerCase()) !== -1); break;
-      case 'title': return this.books.filter(book => book.title.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
-      case 'author': return this.books.filter(book => book.author.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
-      case 'type': return this.books.filter(book => this.bookTypes[book.type].toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
-      case 'number of pages': return this.books.filter(book =>  book.pagesNumber.toString().indexOf(searchString.toLowerCase()) !== -1); break;
-      case 'release date': return this.books.filter(book => book.releaseDate.toString().toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
-      case 'borrowed by': return this.books.filter(book => book.borrower.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'isbn':
+        return this.books.filter(book =>  book.isbn.toString().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'title':
+        return this.books.filter(book => book.title.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'author':
+        return this.books.filter(book => book.author.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'type':
+        return this.books.filter(book => this.bookTypes[book.type].toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'pagesNumber':
+        return this.books.filter(book =>  book.pagesNumber.toString().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'releaseDate':
+        return this.books.filter(book => book.releaseDate.toString().toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
+      case 'borrower':
+        return this.books.filter(book => book.borrower.toLowerCase().indexOf(searchString.toLowerCase()) !== -1); break;
     }
   }
 
@@ -121,21 +128,18 @@ export class BooksListComponent implements OnInit {
 
   addNewBook(): void{
     if (!this.checkIfBookWithIsbnExist()){
-      this.addAlertSuccess = true;
+      this.alertSuccess = true;
       this._libraryService.addBook(this.bookToAdd);
       this.setBookToAddEmpty();
-      this.addEditBookForm.reset();
     }
+    else{
+      this.alertFailure = true;
+    }
+    this.closeModal();
   }
 
   checkIfBookWithIsbnExist(): boolean{
-    if(this.books.filter(book =>  book.isbn === this.bookToAdd.isbn).length > 0){
-      alert('the book with this ISBN: ' + this.bookToAdd.isbn + ' already exist !!!');
-      return true;
-    }
-    else{
-      return false;
-    }
+    return (this.books.filter(book =>  book.isbn === this.bookToAdd.isbn).length > 0);
   }
 
   deleteBook(): void{
@@ -147,17 +151,33 @@ export class BooksListComponent implements OnInit {
   }
 
   onChangeFilterOption(value: string): void{
-    this.searchTextIsActive = true;
+    this.searchTextBoxIsActive = true;
     this._searchTerm = '';
     this.filteredBooks = this.books;
     this.searchTextBoxActive = true;
   }
 
   onSubmit(): void{
-    this._libraryService.saveEditedBook(this.selectedRow, this.addEditBookForm.value);
+    if (!this.checkIfBookWithIsbnExist()){
+      this.alertSuccess = true;
+      this._libraryService.saveEditedBook(this.selectedRow, this.addEditBookForm.value);
+    }
+    else{
+      this.alertFailure = true;
+    }
+    this.closeModal();
   }
 
-  closeAlert(): void {
-    this.addAlertSuccess = false;
+  closeAlertSuccess(): void {
+    this.alertSuccess = false;
+  }
+
+  closeAlertFailure(): void {
+    this.alertFailure = false;
+  }
+
+  closeModal(): void{
+    this.addEditBookForm.reset();
+    this.modalRef.close();
   }
 }

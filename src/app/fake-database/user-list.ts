@@ -1,4 +1,4 @@
-import { User } from "../model/user";
+import { User } from '../model/user';
 
 export const USERS: User[] = [
     {
@@ -9,8 +9,7 @@ export const USERS: User[] = [
     },
     {
         name: "Bob Uncle"
-    }
-    ,
+    },
     {
         name: 'Marcus Peterson'
     },
@@ -20,4 +19,4 @@ export const USERS: User[] = [
     {
         name: 'Adam Endered'
     }
-] ;
+];

@@ -1,4 +1,4 @@
-import { BookType } from "./book-types";
+import { BookType } from './book-types';
 
 export interface Book {
     isbn: number;
