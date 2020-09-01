@@ -11,6 +11,9 @@ import { LibraryService } from './services/library.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BookDetailsComponent } from './book-details/book-details.component';
 import { UserService } from './services/user.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgxSpinnerModule } from 'ngx-spinner';
+import {NgxPaginationModule} from 'ngx-pagination';
 
 
 
@@ -26,6 +29,9 @@ import { UserService } from './services/user.service';
     NgbModule,
     FormsModule,
     ReactiveFormsModule,
+    BrowserAnimationsModule,
+    NgxSpinnerModule,
+    NgxPaginationModule
   ],
   providers: [LibraryService, UserService],
   bootstrap: [AppComponent]

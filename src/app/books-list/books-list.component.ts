@@ -7,6 +7,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LibraryService } from '../services/library.service';
 import { UserService } from '../services/user.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 
 @Component({
@@ -25,16 +26,18 @@ export class BooksListComponent implements OnInit {
   selectedRow: number;
   bookTypes = BookType;
   keysBookTypes: string[];
-  bookToAdd: Book;
-  bookToEdit: Book;
+  bookToAddOrEdit: Book;
+  modalButtonName: string;
   filterType: string[];
   searchTextBoxActive: boolean;
   searchTextBoxIsActive: boolean;
 
   alertSuccess: boolean;
   alertFailure: boolean;
+  isLoading: boolean;
 
   private modalRef: NgbModalRef;
+  page: number = 1;
 
   addEditBookForm = this.fb.group({
     isbn:  ['', [Validators.required, Validators.pattern('^\\d{13}$')]],
@@ -51,10 +54,13 @@ export class BooksListComponent implements OnInit {
       private _libraryService: LibraryService,
       private modalService: NgbModal,
       private fb: FormBuilder,
-      private router: Router) {
+      private router: Router,
+      private spinner: NgxSpinnerService) {
       }
 
   ngOnInit(): void {
+    this.isLoading = true;
+    this.spinner.show();
     this.searchTextBoxActive = false;
     this.alertSuccess = false;
     this.alertFailure = false;
@@ -63,7 +69,7 @@ export class BooksListComponent implements OnInit {
     this.searchTextBoxIsActive = false;
     this.keysBookTypes = Object.keys(this.bookTypes).filter(k => !isNaN(Number(k)));
 
-    this.bookToAdd = {
+    this.bookToAddOrEdit = {
       isbn: null,
       title: '',
       author: '',
@@ -72,14 +78,28 @@ export class BooksListComponent implements OnInit {
       releaseDate: null,
       borrower: '',
     };
-    this.filterType = Object.keys(this.bookToAdd);
+    this.filterType = Object.keys(this.bookToAddOrEdit);
 
-    this._libraryService.getBooks().subscribe(booksSend => this.books = booksSend);
+    this._libraryService.getBooks().subscribe(booksSend => {
+      this.books = booksSend;
+      this.isLoading = false;
+      this.spinner.hide();
+    });
     this._libraryService.getBooks().subscribe(booksSend => this.filteredBooks = booksSend);
     this._userService.getUsers().subscribe(usersSend => this.users = usersSend);
   }
 
-  open(content): void {
+  openAddModal(content): void {
+    this.closeAlert();
+    this.setBookToAddEmpty();
+    this.selectedRow = -1;
+    this.modalButtonName = 'Add'
+    this.modalRef = this.modalService.open(content);
+  }
+
+  openEditModal(content): void {
+    this.closeAlert();
+    this.modalButtonName = 'Save';
     this.modalRef = this.modalService.open(content);
   }
 
@@ -88,6 +108,7 @@ export class BooksListComponent implements OnInit {
   }
 
   set searchTerm(searchValue: string){
+    this.selectedRow = -1;
     this._searchTerm = searchValue;
     this.filteredBooks = this.filterBooks(searchValue);
   }
@@ -112,42 +133,54 @@ export class BooksListComponent implements OnInit {
   }
 
   setClickedRow(index: number, book: Book): void {
+    this.closeAlert();
     this.selectedRow = index;
-    this.bookToEdit = book;
+    this.bookToAddOrEdit.isbn = book.isbn;
+    this.bookToAddOrEdit.title = book.title;
+    this.bookToAddOrEdit.author = book.author;
+    this.bookToAddOrEdit.type = book.type;
+    this.bookToAddOrEdit.pagesNumber = book.pagesNumber;
+    this.bookToAddOrEdit.releaseDate = book.releaseDate;
+    this.bookToAddOrEdit.borrower = book.borrower;
   }
 
   setBookToAddEmpty(): void {
-    this.bookToAdd.isbn = null;
-    this.bookToAdd.title = '';
-    this.bookToAdd.author = '';
-    this.bookToAdd.type = null;
-    this.bookToAdd.pagesNumber = null;
-    this.bookToAdd.releaseDate = null;
-    this.bookToAdd.borrower = '';
+    this.bookToAddOrEdit.isbn = null;
+    this.bookToAddOrEdit.title = '';
+    this.bookToAddOrEdit.author = '';
+    this.bookToAddOrEdit.type = null;
+    this.bookToAddOrEdit.pagesNumber = null;
+    this.bookToAddOrEdit.releaseDate = null;
+    this.bookToAddOrEdit.borrower = '';
   }
+  checkIfBookWithIsbnExist(): boolean{
 
-  addNewBook(): void{
-    if (!this.checkIfBookWithIsbnExist()){
-      this.alertSuccess = true;
-      this._libraryService.addBook(this.bookToAdd);
-      this.setBookToAddEmpty();
+    const theSameBooks = this.books.filter(book =>  book.isbn === this.addEditBookForm.controls.isbn.value);
+
+    if(theSameBooks.length === 0){
+      return false;
+    }
+
+    else if((theSameBooks.length > 0) && (theSameBooks[0].isbn === this.bookToAddOrEdit.isbn)){
+      return false;
+
     }
     else{
-      this.alertFailure = true;
+      return true;
     }
-    this.closeModal();
-  }
-
-  checkIfBookWithIsbnExist(): boolean{
-    return (this.books.filter(book =>  book.isbn === this.bookToAdd.isbn).length > 0);
   }
 
   deleteBook(): void{
-    this._libraryService.deleteBook(this.selectedRow);
+    this.closeAlert();
+    this._libraryService.deleteBook(this.bookToAddOrEdit.isbn);
+    this.filteredBooks = this.books;
+    this.alertSuccess = true;
+    this.selectedRow = -1;
   }
 
   goToDetails(): void{
-    this.router.navigate(['/library', this.selectedRow]);
+    this.closeAlert();
+    this.router.navigate(['/library', this.bookToAddOrEdit.isbn]);
   }
 
   onChangeFilterOption(value: string): void{
@@ -158,14 +191,24 @@ export class BooksListComponent implements OnInit {
   }
 
   onSubmit(): void{
-    if (!this.checkIfBookWithIsbnExist()){
-      this.alertSuccess = true;
-      this._libraryService.saveEditedBook(this.selectedRow, this.addEditBookForm.value);
-    }
-    else{
+
+    if (this.checkIfBookWithIsbnExist()){
       this.alertFailure = true;
     }
+    else{
+      this.alertSuccess = true;
+
+      if (this.modalButtonName === 'Add'){
+        this._libraryService.addBook(this.addEditBookForm.value);
+      }
+
+      else if (this.modalButtonName === 'Save'){
+        this._libraryService.saveEditedBook(this.bookToAddOrEdit.isbn, this.addEditBookForm.value);
+      }
+    }
     this.closeModal();
+    this.filteredBooks = this.books;
+
   }
 
   closeAlertSuccess(): void {
@@ -179,5 +222,10 @@ export class BooksListComponent implements OnInit {
   closeModal(): void{
     this.addEditBookForm.reset();
     this.modalRef.close();
+  }
+
+  closeAlert(): void{
+    this.alertSuccess = false;
+    this.alertFailure = false;
   }
 }

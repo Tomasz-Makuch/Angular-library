@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 import { Book } from '../model/book';
 import { By } from '@angular/platform-browser';
 import { of} from 'rxjs';
+import {NgxPaginationModule} from 'ngx-pagination';
 
 describe('BooksListComponent', () => {
   let component: BooksListComponent;
@@ -41,6 +42,7 @@ describe('BooksListComponent', () => {
       declarations: [ BooksListComponent],
       imports: [ FormsModule,
         ReactiveFormsModule,
+        NgxPaginationModule,
         RouterTestingModule.withRoutes([ {path: 'library', component: FakeComponent}])
       ],
       providers: [
@@ -94,7 +96,7 @@ describe('BooksListComponent', () => {
   });
 
 
-  it('should show 101 list item when I have 100 books (becouse one tr is thead)', () => {
+  it('should show 6 list item when I have 100 books (becouse one tr is thead) and pagination = 5', () => {
     const fakeBooks: Book[] = new Array();
     for (let i = 0; i < 100 ; i++) {
         fakeBooks.push({
@@ -110,7 +112,7 @@ describe('BooksListComponent', () => {
     component.filteredBooks = fakeBooks;
     fixture.detectChanges();
     const tableItems = fixture.debugElement.queryAll(By.css('tr'));
-    expect(tableItems.length).toBe(101);
+    expect(tableItems.length).toBe(6);
   });
 });
 

@@ -1,18 +1,9 @@
-<div class="container">
+<div *ngIf="!isLoading" class="container">
 
     <div class="row">
         <div class="col-sm-12 text-center title">
             <h1>Book details</h1>
         </div>
-    </div>
-
-    <div class="row">
-      <div class="col-sm-6">
-        <button [disabled]="selectedRow===0" type="button" class="btn btn-secondary"  (click)="goPrevious();">Previous book</button>
-      </div>
-      <div class="col-sm-6">
-          <button [disabled]="selectedRow===(numberOfBooks-1)" type="button" class="btn btn-primary"  (click)="goNext(); ">Next book</button>
-      </div>
     </div>
 
     <div class="row">
@@ -62,3 +53,12 @@
     </div>
     
 </div>
+
+<ngx-spinner
+  bdColor="rgba(51,51,51,0.8)"
+  size="medium"
+  color="#fff"
+  type="ball-scale-multiple"
+>
+  <p style="font-size: 20px; color: white">Loading...</p>
+</ngx-spinner>

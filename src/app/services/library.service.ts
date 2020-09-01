@@ -20,8 +20,9 @@ export class LibraryService {
     return of(this.books).pipe(delay(1000));
   }
 
-  getBook(selectedRow: number): Observable<Book> {
-    return of(this.books[selectedRow]).pipe(delay(1000));
+  getBook(isbn: number): Observable<Book> {
+    const index = this.books.findIndex(x => x.isbn === isbn);
+    return of(this.books[index]).pipe(delay(1000));
   }
 
   getNumberOfBooks(): Observable<number> {
@@ -32,15 +33,18 @@ export class LibraryService {
     this.books.push(JSON.parse(JSON.stringify(book)));
   }
 
-  saveEditedBook(selectedRow: number, book: Book): void{
-    this.books[selectedRow] = JSON.parse(JSON.stringify(book));
+  saveEditedBook(isbn: number, book: Book): void{
+    const index = this.books.findIndex(x => x.isbn === isbn);
+    this.books[index] = JSON.parse(JSON.stringify(book));
   }
 
-  deleteBook(selectedRow: number): void{
-    this.books.splice(selectedRow, 1);
+  deleteBook(isbn: number): void{
+    const index = this.books.findIndex(x => x.isbn === isbn);
+    this.books.splice(index, 1);
   }
 
-  borrowBook(selectedRow: number, user: string): void {
-    this.books[selectedRow].borrower = user;
+  borrowBook(isbn: number, user: string): void {
+    const index = this.books.findIndex(x => x.isbn === isbn);
+    this.books[index].borrower = user;
   }
 }

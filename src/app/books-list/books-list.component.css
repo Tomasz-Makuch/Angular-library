@@ -9,18 +9,22 @@
 .table tr.active td{
     background-color:#125156 !important;
     color: white;
-  }
+}
 
-  .modal-footer .btn{
+.modal-footer .btn{
       width: 45%;
       margin: auto;
   }
 
-  .form-group label{
-      margin-right: 15px;
-  }
+.form-group label{
+     margin-right: 15px;
+}
 
-  .form-group select{
-      width: 68%;
-  }
+.form-group select{
+     width: 68%;
+}
+
+.pagination{
+    text-align: center;
+}
 
